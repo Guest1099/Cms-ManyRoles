@@ -120,7 +120,7 @@ app.UseAuthorization();
 
 app.UseCors(options =>
 {
-    options.WithOrigins("http://localhost:10001")
+    options.WithOrigins("http://localhost:10015")
     .AllowAnyMethod()
     .AllowAnyHeader();
 });

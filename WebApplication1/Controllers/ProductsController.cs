@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1.Controllers
 {
-    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
@@ -19,6 +18,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator, User")]
         [HttpGet]
         public async Task<ActionResult<TaskResult<List<Product>>>> GetProducts()
         {
@@ -36,6 +36,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator, User")]
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskResult<Product>>> GetProduct(string id)
         {
@@ -53,6 +54,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator")]
         [HttpPost]
         public async Task<ActionResult<TaskResult<Product>>> PostProduct(Product model)
         {
@@ -70,6 +72,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator")]
         [HttpPut("{id}")]
         public async Task<ActionResult<TaskResult<Product>>> PutProduct(string id, Product model)
         {
@@ -90,6 +93,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<TaskResult<Product>>> DeleteProduct(string id)
         {

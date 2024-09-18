@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     [ApiController]
     public class RejestratorLogowaniaController : ControllerBase
@@ -17,7 +18,6 @@ namespace WebApplication1.Controllers
         }
 
 
-        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<TaskResult<List<RejestratorLogowania>>>> GetRejestratorLogowanias()
         {
@@ -35,7 +35,6 @@ namespace WebApplication1.Controllers
 
 
 
-        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskResult<RejestratorLogowania>>> GetRejestratorLogowania(string id)
         {
@@ -53,7 +52,6 @@ namespace WebApplication1.Controllers
 
 
 
-        [Authorize(Roles = "Administrator")]
         [HttpPost]
         public async Task<ActionResult<TaskResult<RejestratorLogowania>>> PostRejestratorLogowania(RejestratorLogowania model)
         {
@@ -71,7 +69,6 @@ namespace WebApplication1.Controllers
 
 
 
-        [Authorize(Roles = "Administrator")]
         [HttpPut("{id}")]
         public async Task<ActionResult<TaskResult<RejestratorLogowania>>> PutRejestratorLogowania(string id, RejestratorLogowania model)
         {
@@ -93,7 +90,6 @@ namespace WebApplication1.Controllers
 
 
 
-        [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<TaskResult<RejestratorLogowania>>> DeleteMovie(string id)
         {

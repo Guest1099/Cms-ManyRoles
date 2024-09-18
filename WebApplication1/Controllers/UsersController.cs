@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1.Controllers
 {
-    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -18,6 +17,8 @@ namespace WebApplication1.Controllers
             _usersService = usersService;
         }
 
+
+        [Authorize(Roles = "Administrator, User")]
         [HttpGet]
         public async Task<ActionResult<TaskResult<List<ApplicationUser>>>> GetUsers()
         {
@@ -35,6 +36,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator, User")]
         [HttpGet("getUserById/{id}")]
         public async Task<ActionResult<TaskResult<ApplicationUser>>> GetUserById(string id)
         {
@@ -51,6 +53,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator, User")]
         [HttpGet("getUserByEmail/{email}")]
         public async Task<ActionResult<TaskResult<ApplicationUser>>> GetUserByEmail(string email)
         {
@@ -68,6 +71,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator")]
         [HttpPost]
         public async Task<ActionResult<TaskResult<ApplicationUser>>> PostUser(RegisterViewModel model)
         {
@@ -85,6 +89,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator")]
         [HttpPut("{id}")]
         public async Task<ActionResult<TaskResult<ApplicationUser>>> PutUser(string id, ApplicationUser model)
         {
@@ -105,6 +110,7 @@ namespace WebApplication1.Controllers
 
 
 
+        [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<TaskResult<ApplicationUser>>> DeleteUser (string id)
         {

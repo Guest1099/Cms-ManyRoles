@@ -51,7 +51,7 @@ namespace WebApplication1.Controllers
 
 
 
-        //[Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator, User")]
         [HttpPost]
         public async Task<ActionResult<TaskResult<Category>>> PostCategory(Category model)
         {
@@ -68,7 +68,7 @@ namespace WebApplication1.Controllers
 
 
 
-        //[Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator, User")]
         [HttpPut("{id}")]
         public async Task<ActionResult<TaskResult<Category>>> PutCategory(string id, Category model)
         {
@@ -88,7 +88,7 @@ namespace WebApplication1.Controllers
 
 
 
-        //[Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator, User")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<TaskResult<Category>>> DeleteCategory(string id)
         {

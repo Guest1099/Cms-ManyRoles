@@ -145,6 +145,97 @@ namespace Application.Services
 
 
         // Logowanie wyłącznie dla administratora systemu
+        /*
+                public async Task<TaskResult<LoginViewModel>> Login(LoginViewModel model)
+                {
+                    var taskResult = new TaskResult<LoginViewModel>() { Success = true, Model = new LoginViewModel(), Message = "" };
+
+                    try
+                    {
+                        var user = await _userManager.FindByEmailAsync(model.Email);
+
+                        if (user != null)
+                        {
+                            // pobranie wszystkich ról użytkownika
+                            var userRoles = await _userManager.GetRolesAsync(user);
+                            //string firstRole = (userRoles != null && userRoles.Count > 0) ? userRoles[0] : ""; 
+
+                            for (var i = 0; i < userRoles.Count; i++)
+                            {
+                                string roleName = userRoles[i];// zalogować się może tylko i wyłącznie administrator
+                                if (roleName == "Administrator")
+                                {
+                                    var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: true, lockoutOnFailure: true);
+                                    if (result.Succeeded)
+                                    {
+                                        taskResult.Success = true;
+
+                                        DateTime expirationTimeToken = DateTime.Now.AddSeconds(5);
+                                        DateTime expirationTimeNewToken = expirationTimeToken.AddSeconds(5);
+
+                                        taskResult.Model = new LoginViewModel()
+                                        {
+                                            Email = user.Email,
+                                            Token = _userSupportService.GenerateJwtToken(user, roleName),
+                                            NewToken = _userSupportService.GenerateJwtNewToken(model.Email, roleName),
+                                            ExpirationTimeToken = expirationTimeToken.ToString(), // czas wylogowania po wygaśnięciu tokena
+                                            ExpirationTimeNewToken = expirationTimeNewToken.ToString(),
+                                            Role = roleName,
+                                        };
+
+
+
+                                        // mówi o tym, kiedyu żytkownik się zalogował 
+                                        rejestratorLogowaniaId = Guid.NewGuid().ToString();
+                                        RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
+                                        {
+                                            RejestratorLogowaniaId = rejestratorLogowaniaId,
+                                            DataZalogowania = DateTime.Now.ToString(),
+                                            DataWylogowania = "",
+                                            CzasZalogowania = "",
+                                            UserId = user.Id
+                                        };
+                                        _context.RejestratorLogowania.Add(rejestratorLogowania);
+                                        await _context.SaveChangesAsync();
+
+
+                                    }
+                                    else
+                                    {
+                                        taskResult.Success = false;
+                                        taskResult.Message = "Błędny login lub hasło";
+                                    }
+                                    break;
+                                }
+                                else
+                                {
+                                    taskResult.Success = false;
+                                    taskResult.Message = "Konto dostępne wyłącznie dla administartora systemu";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            taskResult.Success = false;
+                            taskResult.Message = "Użytkownik nie istnieje";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        taskResult.Success = false;
+                        taskResult.Message = ex.Message;
+                    }
+
+                    return taskResult;
+                }
+
+        */
+
+
+
+
+
+
         public async Task<TaskResult<LoginViewModel>> Login(LoginViewModel model)
         {
             var taskResult = new TaskResult<LoginViewModel>() { Success = true, Model = new LoginViewModel(), Message = "" };
@@ -155,63 +246,55 @@ namespace Application.Services
 
                 if (user != null)
                 {
-                    // sprawdź uprawnienia
-
+                    // pobranie wszystkich ról użytkownika
                     var userRoles = await _userManager.GetRolesAsync(user);
-                    //string firstRole = (userRoles != null && userRoles.Count > 0) ? userRoles[0] : ""; 
-
-                    for (var i = 0; i < userRoles.Count; i++)
+                    if (userRoles.Count > 0)
                     {
-                        string roleName = userRoles[i];// zalogować się może tylko i wyłącznie administrator
-                        if (roleName == "Administrator")
+                        string firstRole = userRoles[0];
+                        var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: true, lockoutOnFailure: true);
+                        if (result.Succeeded)
                         {
-                            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: true, lockoutOnFailure: true);
-                            if (result.Succeeded)
+                            taskResult.Success = true;
+
+                            DateTime expirationTimeToken = DateTime.Now.AddMinutes(5);
+                            DateTime expirationTimeNewToken = expirationTimeToken.AddMinutes(5);
+
+                            taskResult.Model = new LoginViewModel()
                             {
-                                taskResult.Success = true;
-
-                                DateTime expirationTimeToken = DateTime.Now.AddSeconds(5);
-                                DateTime expirationTimeNewToken = expirationTimeToken.AddSeconds(5);
-
-                                taskResult.Model = new LoginViewModel()
-                                {
-                                    Email = user.Email,
-                                    Token = _userSupportService.GenerateJwtToken(user, roleName),
-                                    NewToken = _userSupportService.GenerateJwtNewToken(model.Email, roleName),
-                                    ExpirationTimeToken = expirationTimeToken.ToString(), // czas wylogowania po wygaśnięciu tokena
-                                    ExpirationTimeNewToken = expirationTimeNewToken.ToString(),
-                                    Role = roleName,
-                                };
+                                Email = user.Email,
+                                Token = _userSupportService.GenerateJwtToken(user, firstRole),
+                                NewToken = _userSupportService.GenerateJwtNewToken(model.Email, firstRole),
+                                ExpirationTimeToken = expirationTimeToken.ToString(), // czas wylogowania po wygaśnięciu tokena
+                                ExpirationTimeNewToken = expirationTimeNewToken.ToString(),
+                                Role = firstRole,
+                            };
 
 
 
-                                // mówi o tym, kiedyu żytkownik się zalogował 
-                                rejestratorLogowaniaId = Guid.NewGuid().ToString();
-                                RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
-                                {
-                                    RejestratorLogowaniaId = rejestratorLogowaniaId,
-                                    DataZalogowania = DateTime.Now.ToString(),
-                                    DataWylogowania = "",
-                                    CzasZalogowania = "",
-                                    UserId = user.Id
-                                };
-                                _context.RejestratorLogowania.Add(rejestratorLogowania);
-                                await _context.SaveChangesAsync();
-
-
-                            }
-                            else
+                            // mówi o tym, kiedyu żytkownik się zalogował 
+                            rejestratorLogowaniaId = Guid.NewGuid().ToString();
+                            RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
                             {
-                                taskResult.Success = false;
-                                taskResult.Message = "Błędny login lub hasło";
-                            }
-                            break;
+                                RejestratorLogowaniaId = rejestratorLogowaniaId,
+                                DataZalogowania = DateTime.Now.ToString(),
+                                DataWylogowania = "",
+                                CzasZalogowania = "",
+                                UserId = user.Id
+                            };
+                            _context.RejestratorLogowania.Add(rejestratorLogowania);
+                            await _context.SaveChangesAsync();
+
                         }
                         else
                         {
                             taskResult.Success = false;
-                            taskResult.Message = "Konto dostępne wyłącznie dla administartora systemu";
+                            taskResult.Message = "Błędny login lub hasło";
                         }
+                    } 
+                    else
+                    {
+                        taskResult.Success = false;
+                        taskResult.Message = "Brak rół użytkownika";
                     }
                 }
                 else
@@ -230,148 +313,12 @@ namespace Application.Services
         }
 
 
-        /*
-       public async Task<TaskResult<LoginViewModel>> Login(LoginViewModel model)
-       {
-           var taskResult = new TaskResult<LoginViewModel>() { Success = true, Model = new LoginViewModel(), Message = "" };
-
-           try
-           {
-               var user = await _userManager.FindByEmailAsync(model.Email);
-
-               if (user != null)
-               {
-                   // sprawdź uprawnienia
-
-                   var userRoles = await _userManager.GetRolesAsync(user);
-                   if (userRoles.Count > 0)
-                   {
-                       // pierwsza rola
-                       string roleName = userRoles[0];
-
-                       var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: true, lockoutOnFailure: true);
-                       if (result.Succeeded)
-                       {
-                           taskResult.Success = true;
-
-                           DateTime expirationTimeToken = DateTime.Now.AddSeconds(10);
-                           DateTime expirationTimeNewToken = expirationTimeToken.AddSeconds(10);
-
-                           taskResult.Model = new LoginViewModel()
-                           {
-                               Email = user.Email,
-                               Token = _userSupportService.GenerateJwtToken(user, roleName),
-                               NewToken = _userSupportService.GenerateJwtNewToken(model.Email, roleName),
-                               ExpirationTimeToken = expirationTimeToken.ToString(), // czas wylogowania po wygaśnięciu tokena
-                               ExpirationTimeNewToken = expirationTimeNewToken.ToString(),
-                               Role = roleName,
-                           };
 
 
 
-                           // mówi o tym, kiedyu żytkownik się zalogował 
-                           rejestratorLogowaniaId = Guid.NewGuid().ToString();
-                           RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
-                           {
-                               RejestratorLogowaniaId = rejestratorLogowaniaId,
-                               DataZalogowania = DateTime.Now.ToString(),
-                               DataWylogowania = "",
-                               CzasZalogowania = "",
-                               UserId = user.Id
-                           };
-                           _context.RejestratorLogowania.Add(rejestratorLogowania);
-                           await _context.SaveChangesAsync();
 
 
-                       }
-                       else
-                       {
-                           taskResult.Success = false;
-                           taskResult.Message = "Błędny login lub hasło";
-                       }
-                   }
-
-               }
-               else
-               {
-                   taskResult.Success = false;
-                   taskResult.Message = "Użytkownik nie istnieje";
-               }
-           }
-           catch (Exception ex)
-           {
-               taskResult.Success = false;
-               taskResult.Message = ex.Message;
-           }
-
-           return taskResult;
-       }
-*/
-
-
-        /*
-                public async Task<TaskResult<LoginViewModel>> Login(LoginViewModel model)
-                {
-                    var taskResult = new TaskResult<LoginViewModel>() { Success = true, Model = new LoginViewModel(), Message = "" };
-
-                    try
-                    {
-                        var user = await _userManager.FindByEmailAsync(model.Email);
-
-                        if (user != null)
-                        {
-                            var userRoles = await _userManager.GetRolesAsync(user);
-                            for (var i = 0; i < userRoles.Count; i++)
-                            {
-                                string roleName = userRoles[i];
-                                if (roleName == "Administrator")
-                                {
-                                    var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: true, lockoutOnFailure: true);
-                                    if (result.Succeeded)
-                                    {
-                                        // Generowanie JWT i Refresh Token
-                                        var token = _userSupportService.GenerateJwtToken(user, roleName);
-                                        var refreshToken = _userSupportService.GenerateRefreshToken();
-
-
-                                        taskResult.Model = new LoginViewModel()
-                                        {
-                                            Email = user.Email,
-                                            Token = token,
-                                            RefreshToken = refreshToken,
-                                            Role = roleName,
-                                            DataZalogowania = DateTime.Now.ToString(),
-                                            DataWylogowania = DateTime.Now.AddHours(24).ToString()
-                                        };
-                                    }
-                                    else
-                                    {
-                                        taskResult.Success = false;
-                                        taskResult.Message = "Błędny login lub hasło";
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            taskResult.Success = false;
-                            taskResult.Message = "Użytkownik nie istnieje";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        taskResult.Success = false;
-                        taskResult.Message = ex.Message;
-                    }
-
-                    return taskResult;
-                }
-        */
-
-
-
-        public Task<TaskResult<string>> GenerateNewToken (TokenViewModel model)
+        public Task<TaskResult<string>> GenerateNewToken(TokenViewModel model)
         {
             var taskResult = new TaskResult<string>() { Success = true, Model = "", Message = "" };
 
@@ -380,7 +327,7 @@ namespace Application.Services
                 if (model.Email != null && model.Role != null)
                 {
                     var storedRefreshToken = _userSupportService.GenerateJwtNewToken(model.Email, model.Role);
-                    if (!string.IsNullOrEmpty (storedRefreshToken))
+                    if (!string.IsNullOrEmpty(storedRefreshToken))
                     {
                         taskResult.Model = storedRefreshToken;
                         taskResult.Success = true;
@@ -403,7 +350,7 @@ namespace Application.Services
                 taskResult.Message = ex.Message;
             }
 
-            return Task.FromResult (taskResult);
+            return Task.FromResult(taskResult);
         }
 
 
@@ -416,7 +363,7 @@ namespace Application.Services
                 rejestratorLogowania.DataWylogowania = DateTime.Now.ToString();
 
                 var czasZalogowania = DateTime.Now - DateTime.Parse(rejestratorLogowania.DataZalogowania);
-                rejestratorLogowania.CzasZalogowania = czasZalogowania.ToString(); 
+                rejestratorLogowania.CzasZalogowania = czasZalogowania.ToString();
 
                 _context.Entry(rejestratorLogowania).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
@@ -424,7 +371,7 @@ namespace Application.Services
             await _signInManager.SignOutAsync();
         }
 
-         
+
 
         public async Task<TaskResult<ChangeEmailViewModel>> ChangeEmail(ChangeEmailViewModel model)
         {
@@ -438,7 +385,7 @@ namespace Application.Services
                     // wyszukuja użytkownika na podstawie emaila
                     if ((await _context.Users.FirstOrDefaultAsync(f => f.Email == model.NewEmail)) == null)
                     {
-                        ApplicationUser user = await _userManager.FindByEmailAsync (model.ObecnyEmail);
+                        ApplicationUser user = await _userManager.FindByEmailAsync(model.ObecnyEmail);
                         if (user != null)
                         {
                             string token = await _userManager.GenerateChangeEmailTokenAsync(user, model.NewEmail);
@@ -740,7 +687,7 @@ namespace Application.Services
         }
 
 
-         
+
 
 
         /// <summary>
