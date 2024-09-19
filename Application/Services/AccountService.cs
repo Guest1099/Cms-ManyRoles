@@ -256,8 +256,8 @@ namespace Application.Services
                         {
                             taskResult.Success = true;
 
-                            DateTime expirationTimeToken = DateTime.Now.AddMinutes(5);
-                            DateTime expirationTimeNewToken = expirationTimeToken.AddMinutes(5);
+                            DateTime expirationTimeToken = DateTime.Now.AddSeconds(5);
+                            DateTime expirationTimeNewToken = expirationTimeToken.AddSeconds(5);
 
                             taskResult.Model = new LoginViewModel()
                             {
@@ -270,7 +270,7 @@ namespace Application.Services
                             };
 
 
-
+/*
                             // mówi o tym, kiedyu żytkownik się zalogował 
                             rejestratorLogowaniaId = Guid.NewGuid().ToString();
                             RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
@@ -283,7 +283,7 @@ namespace Application.Services
                             };
                             _context.RejestratorLogowania.Add(rejestratorLogowania);
                             await _context.SaveChangesAsync();
-
+*/
                         }
                         else
                         {
@@ -357,7 +357,7 @@ namespace Application.Services
 
         public async Task Logout()
         {
-            var rejestratorLogowania = await _context.RejestratorLogowania.FirstOrDefaultAsync(f => f.RejestratorLogowaniaId == rejestratorLogowaniaId);
+            /*var rejestratorLogowania = await _context.RejestratorLogowania.FirstOrDefaultAsync(f => f.RejestratorLogowaniaId == rejestratorLogowaniaId);
             if (rejestratorLogowania != null)
             {
                 rejestratorLogowania.DataWylogowania = DateTime.Now.ToString();
@@ -367,7 +367,7 @@ namespace Application.Services
 
                 _context.Entry(rejestratorLogowania).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-            }
+            }*/
             await _signInManager.SignOutAsync();
         }
 
