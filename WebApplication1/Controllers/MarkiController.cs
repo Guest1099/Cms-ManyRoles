@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1.Controllers
 {
-    [Authorize(Roles = "Administrator, User")]
+    // [Authorize(Roles = "Administrator, User")]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class MarkiController : ControllerBase
@@ -28,7 +29,8 @@ namespace WebApplication1.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                // return StatusCode(500, $"Internal server error: {ex.Message}");
+                return Unauthorized();
             }
         }
 
@@ -45,7 +47,8 @@ namespace WebApplication1.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                // return StatusCode(500, $"Internal server error: {ex.Message}");
+                return Unauthorized();
             }
         }
 
@@ -62,7 +65,8 @@ namespace WebApplication1.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                // return StatusCode(500, $"Internal server error: {ex.Message}");
+                return Unauthorized();
             }
         }
 
@@ -82,7 +86,8 @@ namespace WebApplication1.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                // return StatusCode(500, $"Internal server error: {ex.Message}");
+                return Unauthorized();
             }
         }
 
@@ -99,7 +104,8 @@ namespace WebApplication1.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                // return StatusCode(500, $"Internal server error: {ex.Message}");
+                return Unauthorized();
             }
         }
     }

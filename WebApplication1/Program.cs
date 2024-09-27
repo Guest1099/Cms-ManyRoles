@@ -58,7 +58,10 @@ builder.Services.AddAuthentication(o =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = issuer,
             ValidAudience = audience,
-            IssuerSigningKey = new SymmetricSecurityKey(key)
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+
+            RequireExpirationTime = true,
+            ClockSkew = TimeSpan.FromSeconds(600)
         };
     });
 
@@ -120,7 +123,7 @@ app.UseAuthorization();
 
 app.UseCors(options =>
 {
-    options.WithOrigins("http://localhost:10001")
+    options.WithOrigins("http://localhost:11005")
     .AllowAnyMethod()
     .AllowAnyHeader();
 });

@@ -18,7 +18,7 @@ namespace WebApplication1.Controllers
         }
 
 
-        [Authorize(Roles = "Administrator, User")]
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<TaskResult<List<ApplicationUser>>>> GetUsers()
         {
@@ -36,7 +36,7 @@ namespace WebApplication1.Controllers
 
 
 
-        [Authorize(Roles = "Administrator, User")]
+        [AllowAnonymous]
         [HttpGet("getUserById/{id}")]
         public async Task<ActionResult<TaskResult<ApplicationUser>>> GetUserById(string id)
         {
@@ -53,7 +53,7 @@ namespace WebApplication1.Controllers
 
 
 
-        [Authorize(Roles = "Administrator, User")]
+        [AllowAnonymous]
         [HttpGet("getUserByEmail/{email}")]
         public async Task<ActionResult<TaskResult<ApplicationUser>>> GetUserByEmail(string email)
         {

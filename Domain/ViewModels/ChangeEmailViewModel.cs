@@ -4,9 +4,7 @@ namespace Domain.ViewModels
 {
     public class ChangeEmailViewModel
     {
-        public string UserName { get; set; }
-
-        public string ObecnyEmail { get; set; }
+        public string Email { get; set; }
 
         [Required(ErrorMessage = "*")]
         [DataType(DataType.EmailAddress)]

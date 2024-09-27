@@ -159,7 +159,21 @@ namespace Data.Repos
                 var category = await _context.Categories.FirstOrDefaultAsync(f => f.CategoryId == categoryId);
                 if (category != null)
                 {
+                    // usunięcie podpodkategori
+                    var subsubcategories = _context.Subsubcategories.Where(w => w.CategoryId == categoryId).ToList();
+                    foreach (var subsubcategory in subsubcategories)
+                        _context.Subsubcategories.Remove(subsubcategory);
+
+                    // usuniecie podkategorii
+
+                    var subcategories = _context.Subcategories.Where(w => w.CategoryId == categoryId).ToList();
+                    foreach (var subcategory in subcategories)
+                        _context.Subcategories.Remove(subcategory);
+
+
+                    // usuniecie kategorii
                     _context.Categories.Remove(category);
+
                     await _context.SaveChangesAsync();
                     taskResult.Success = true;
                     taskResult.Model = category;

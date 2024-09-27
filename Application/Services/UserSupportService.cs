@@ -4,11 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System.Data;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Application.Services
@@ -104,7 +102,7 @@ namespace Application.Services
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             //var expires = DateTime.Now.AddHours(Convert.ToDouble(_configuration["Jwt:JwtExpireHours"]));
-            var expires = DateTime.Now.AddSeconds(5);
+            var expires = DateTime.Now.AddSeconds(600);
 
             var token = new JwtSecurityToken(
                 _configuration["Jwt:Issuer"],
@@ -118,70 +116,45 @@ namespace Application.Services
         }
 
 
+        /*
+                public string GenerateJwtNewToken(string email, string role)
+                {
+                    var claims = new[]
+                    {
+                        new Claim(JwtRegisteredClaimNames.Sub, email),
+                        new Claim(ClaimTypes.Role, role),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    };
 
-        public string GenerateJwtNewToken(string email, string role)
-        {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, email),
-                new Claim(ClaimTypes.Role, role),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
+                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                    var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                    //var expires = DateTime.Now.AddHours(Convert.ToDouble(_configuration["Jwt:JwtExpireHours"]));
+                    var expires = DateTime.Now.AddSeconds(5);
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            //var expires = DateTime.Now.AddHours(Convert.ToDouble(_configuration["Jwt:JwtExpireHours"]));
-            var expires = DateTime.Now.AddSeconds(5);
+                    var token = new JwtSecurityToken(
+                        _configuration["Jwt:Issuer"],
+                        _configuration["Jwt:Issuer"],
+                        claims,
+                        expires: expires,
+                        signingCredentials: credentials
+                    );
 
-            var token = new JwtSecurityToken(
-                _configuration["Jwt:Issuer"],
-                _configuration["Jwt:Issuer"],
-                claims,
-                expires: expires,
-                signingCredentials: credentials
-            );
+                    return new JwtSecurityTokenHandler().WriteToken(token);
+                }
+        */
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+        /*
+                public string GenerateRefreshToken()
+                {
+                    var randomBytes = new byte[64];
+                    using (var rng = RandomNumberGenerator.Create())
+                    {
+                        rng.GetBytes(randomBytes);
+                        return Convert.ToBase64String(randomBytes);
+                    }
+                }
+        */
 
-
-
-        public string GenerateRefreshToken()
-        {
-            var randomBytes = new byte[64];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomBytes);
-                return Convert.ToBase64String(randomBytes);
-            }
-        }
-
-
-/*
-        public string UpdateStoredRefreshToken()
-        {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(ClaimTypes.Role, role),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(Convert.ToDouble(_configuration["Jwt:JwtExpireDays"]));
-
-            var token = new JwtSecurityToken(
-                _configuration["Jwt:Issuer"],
-                _configuration["Jwt:Issuer"],
-                claims,
-                expires: expires,
-                signingCredentials: credentials
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-*/
 
 
     }

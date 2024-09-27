@@ -91,6 +91,23 @@ namespace WebApplication1.Controllers
 
 
         [Authorize(Roles = "Administrator, User")]
+        [HttpPost("updateAccount")]
+        public async Task<ActionResult<TaskResult<ApplicationUser>>> UpdateAccount(ApplicationUser model)
+        {
+            try
+            {
+                var taskResult = await _accountService.UpdateAccount(model);
+                return Ok(taskResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+
+        [Authorize(Roles = "Administrator, User")]
         [HttpPost("changeEmail")]
         public async Task<ActionResult<TaskResult<ChangeEmailViewModel>>> ChangeEmail(ChangeEmailViewModel model)
         {
@@ -125,22 +142,6 @@ namespace WebApplication1.Controllers
 
 
 
-        [Authorize(Roles = "Administrator, User")]
-        [HttpPost("updateAccount")]
-        public async Task<ActionResult<TaskResult<ApplicationUser>>> UpdateAccount(ApplicationUser model)
-        {
-            try
-            {
-                var taskResult = await _accountService.UpdateAccount(model);
-                return Ok(taskResult);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-
 
 
         [Authorize(Roles = "Administrator")]
@@ -159,52 +160,40 @@ namespace WebApplication1.Controllers
         }
 
 
+        /*
+                [AllowAnonymous]
+                [HttpPost("tokenTimeExpired")]
+                public async Task<ActionResult<TaskResult<bool>>> TokenTimeExpired()
+                {
+                    try
+                    {
+                        var taskResult = await _accountService.TokenTimeExpired();
+                        return Ok(taskResult);
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
+        */
 
-
-        [HttpPost("generateNewToken")]
-        public async Task<ActionResult<TaskResult<string>>> GenerateNewToken(TokenViewModel model)
-        {
-            try
-            {
-                var taskResult = await _accountService.GenerateNewToken(model);
-                return Ok(taskResult);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
 
 
         /*
-                [HttpPost("refreshToken")]
-                public IActionResult RefreshToken([FromBody] RefreshTokenRequest (string request)
+                [HttpPost("generateNewToken")]
+                public async Task<ActionResult<TaskResult<string>>> GenerateNewToken(TokenViewModel model)
                 {
-                    // Znajdź refresh token w bazie danych i sprawdź jego ważność
-                    var storedRefreshToken = _accountService.GetStoredRefreshToken(request.RefreshToken);
-                    if (storedRefreshToken != null && storedRefreshToken.IsValid)
+                    try
                     {
-                        var claims = new[]
-                        {
-                                    new Claim(JwtRegisteredClaimNames.Sub, storedRefreshToken.Username),
-                                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                                };
-
-                        var newAccessToken = _tokenService.GenerateAccessToken(claims);
-                        var newRefreshToken = _tokenService.GenerateRefreshToken();
-
-                        // Zaktualizuj refresh token w bazie danych
-                        UpdateStoredRefreshToken(storedRefreshToken.Username, newRefreshToken);
-
-                        return Ok(new
-                        {
-                            AccessToken = newAccessToken,
-                            RefreshToken = newRefreshToken
-                        });
+                        var taskResult = await _accountService.GenerateNewToken(model);
+                        return Ok(taskResult);
                     }
-
-                    return Unauthorized();
-                }*/
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
+        */
 
 
     }

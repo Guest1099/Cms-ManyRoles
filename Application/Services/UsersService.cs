@@ -204,8 +204,8 @@ namespace Application.Services
                     ApplicationUser user = await _context.Users.FirstOrDefaultAsync(f => f.Id == model.Id);
                     if (user != null)
                     {
-                        /*user.Email = model.Email;
-                        user.UserName = model.Email;*/
+                        user.Email = model.Email;
+                        user.UserName = model.Email;
 
                         user.Imie = model.Imie;
                         user.Nazwisko = model.Nazwisko;

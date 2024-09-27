@@ -1,12 +1,9 @@
-﻿using Azure.Core;
-using Data;
-using Data.Repos;
+﻿using Data;
 using Domain.Models;
 using Domain.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 
 namespace Application.Services
@@ -27,6 +24,8 @@ namespace Application.Services
             _userManager = userManager;
             _signInManager = signInManager;
             _userSupportService = userSupportService;
+
+            dataZalogowaniaExternal = DateTime.Now;
         }
 
 
@@ -171,20 +170,20 @@ namespace Application.Services
                                         taskResult.Success = true;
 
                                         DateTime expirationTimeToken = DateTime.Now.AddSeconds(5);
-                                        DateTime expirationTimeNewToken = expirationTimeToken.AddSeconds(5);
+                                        //DateTime expirationTimeNewToken = expirationTimeToken.AddSeconds(5);
 
                                         taskResult.Model = new LoginViewModel()
                                         {
                                             Email = user.Email,
                                             Token = _userSupportService.GenerateJwtToken(user, roleName),
-                                            NewToken = _userSupportService.GenerateJwtNewToken(model.Email, roleName),
+                                            //NewToken = _userSupportService.GenerateJwtNewToken(model.Email, roleName),
                                             ExpirationTimeToken = expirationTimeToken.ToString(), // czas wylogowania po wygaśnięciu tokena
-                                            ExpirationTimeNewToken = expirationTimeNewToken.ToString(),
+                                            //ExpirationTimeNewToken = expirationTimeNewToken.ToString(),
                                             Role = roleName,
                                         };
 
 
-
+        *//*
                                         // mówi o tym, kiedyu żytkownik się zalogował 
                                         rejestratorLogowaniaId = Guid.NewGuid().ToString();
                                         RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
@@ -197,7 +196,7 @@ namespace Application.Services
                                         };
                                         _context.RejestratorLogowania.Add(rejestratorLogowania);
                                         await _context.SaveChangesAsync();
-
+        *//*
 
                                     }
                                     else
@@ -228,7 +227,6 @@ namespace Application.Services
 
                     return taskResult;
                 }
-
         */
 
 
@@ -236,6 +234,9 @@ namespace Application.Services
 
 
 
+
+        private static DateTime dataZalogowaniaExternal;
+        private static string userId;
         public async Task<TaskResult<LoginViewModel>> Login(LoginViewModel model)
         {
             var taskResult = new TaskResult<LoginViewModel>() { Success = true, Model = new LoginViewModel(), Message = "" };
@@ -256,41 +257,50 @@ namespace Application.Services
                         {
                             taskResult.Success = true;
 
-                            DateTime expirationTimeToken = DateTime.Now.AddSeconds(5);
-                            DateTime expirationTimeNewToken = expirationTimeToken.AddSeconds(5);
+                            dataZalogowaniaExternal = DateTime.Now;
+                            userId = user.Id;
+
+
+                            DateTime expirationTimeToken = DateTime.Now.AddSeconds(600);
+                            DateTime ett = expirationTimeToken;
+                            // czas zamieniony na czas charakterystyczny dla JavaScript w formacie "2024-12-12T11:11:00"
+                            string timeJavaScriptExpirationTimeToken = $"{ett.Year}-{ett.Month}-{ett.Day},{ett.Hour}:{ett.Minute}:{ett.Second}";
+
+
 
                             taskResult.Model = new LoginViewModel()
                             {
+                                UserId = user.Id,
                                 Email = user.Email,
                                 Token = _userSupportService.GenerateJwtToken(user, firstRole),
-                                NewToken = _userSupportService.GenerateJwtNewToken(model.Email, firstRole),
-                                ExpirationTimeToken = expirationTimeToken.ToString(), // czas wylogowania po wygaśnięciu tokena
-                                ExpirationTimeNewToken = expirationTimeNewToken.ToString(),
+                                //ExpirationTimeToken = expirationTimeToken.ToString(), // czas wylogowania po wygaśnięciu tokena
+                                ExpirationTimeToken = timeJavaScriptExpirationTimeToken,  // czas podany w JavaScript
+                                //ExpirationTimeToken = czasWylogowania.ToString(), // czas wylogowania po wygaśnięciu tokena
                                 Role = firstRole,
                             };
 
 
-/*
-                            // mówi o tym, kiedyu żytkownik się zalogował 
-                            rejestratorLogowaniaId = Guid.NewGuid().ToString();
-                            RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
-                            {
-                                RejestratorLogowaniaId = rejestratorLogowaniaId,
-                                DataZalogowania = DateTime.Now.ToString(),
-                                DataWylogowania = "",
-                                CzasZalogowania = "",
-                                UserId = user.Id
-                            };
-                            _context.RejestratorLogowania.Add(rejestratorLogowania);
-                            await _context.SaveChangesAsync();
-*/
+                            /*
+                                                        // mówi o tym, kiedyu żytkownik się zalogował 
+                                                        rejestratorLogowaniaId = Guid.NewGuid().ToString();
+                                                        RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
+                                                        {
+                                                            RejestratorLogowaniaId = rejestratorLogowaniaId,
+                                                            DataZalogowania = DateTime.Now.ToString(),
+                                                            DataWylogowania = "",
+                                                            CzasZalogowania = "",
+                                                            UserId = user.Id
+                                                        };
+                                                        _context.RejestratorLogowania.Add(rejestratorLogowania);
+                                                        await _context.SaveChangesAsync();
+                            */
                         }
                         else
                         {
                             taskResult.Success = false;
                             taskResult.Message = "Błędny login lub hasło";
                         }
-                    } 
+                    }
                     else
                     {
                         taskResult.Success = false;
@@ -317,163 +327,146 @@ namespace Application.Services
 
 
 
-
-        public Task<TaskResult<string>> GenerateNewToken(TokenViewModel model)
-        {
-            var taskResult = new TaskResult<string>() { Success = true, Model = "", Message = "" };
-
-            try
-            {
-                if (model.Email != null && model.Role != null)
+        /*
+                public Task<TaskResult<string>> GenerateNewToken(TokenViewModel model)
                 {
-                    var storedRefreshToken = _userSupportService.GenerateJwtNewToken(model.Email, model.Role);
-                    if (!string.IsNullOrEmpty(storedRefreshToken))
+                    var taskResult = new TaskResult<string>() { Success = true, Model = "", Message = "" };
+
+                    try
                     {
-                        taskResult.Model = storedRefreshToken;
-                        taskResult.Success = true;
-                    }
-                    else
-                    {
-                        taskResult.Success = false;
-                        taskResult.Message = "Nie można było wygenerować nowego tokena";
-                    }
-                }
-                else
-                {
-                    taskResult.Success = false;
-                    taskResult.Message = "Email or role was null";
-                }
-            }
-            catch (Exception ex)
-            {
-                taskResult.Success = false;
-                taskResult.Message = ex.Message;
-            }
-
-            return Task.FromResult(taskResult);
-        }
-
-
-
-        public async Task Logout()
-        {
-            /*var rejestratorLogowania = await _context.RejestratorLogowania.FirstOrDefaultAsync(f => f.RejestratorLogowaniaId == rejestratorLogowaniaId);
-            if (rejestratorLogowania != null)
-            {
-                rejestratorLogowania.DataWylogowania = DateTime.Now.ToString();
-
-                var czasZalogowania = DateTime.Now - DateTime.Parse(rejestratorLogowania.DataZalogowania);
-                rejestratorLogowania.CzasZalogowania = czasZalogowania.ToString();
-
-                _context.Entry(rejestratorLogowania).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-            }*/
-            await _signInManager.SignOutAsync();
-        }
-
-
-
-        public async Task<TaskResult<ChangeEmailViewModel>> ChangeEmail(ChangeEmailViewModel model)
-        {
-            var taskResult = new TaskResult<ChangeEmailViewModel>() { Success = true, Model = new ChangeEmailViewModel(), Message = "" };
-
-            try
-            {
-                // Sprawdza czy pola nie są puste
-                if (model != null)
-                {
-                    // wyszukuja użytkownika na podstawie emaila
-                    if ((await _context.Users.FirstOrDefaultAsync(f => f.Email == model.NewEmail)) == null)
-                    {
-                        ApplicationUser user = await _userManager.FindByEmailAsync(model.ObecnyEmail);
-                        if (user != null)
+                        if (model.Email != null && model.Role != null)
                         {
-                            string token = await _userManager.GenerateChangeEmailTokenAsync(user, model.NewEmail);
-                            var result = await _userManager.ChangeEmailAsync(user, model.NewEmail, token);
-                            if (result.Succeeded)
+                            var storedRefreshToken = _userSupportService.GenerateJwtNewToken(model.Email, model.Role);
+                            if (!string.IsNullOrEmpty(storedRefreshToken))
                             {
-                                // zaktualizowanie nazwy użytkownika 
-                                user.Email = model.NewEmail;
-                                user.UserName = model.NewEmail;
-                                await _userManager.UpdateAsync(user);
-                                //await _signInManager.SignOutAsync ();
+                                taskResult.Model = storedRefreshToken;
                                 taskResult.Success = true;
                             }
                             else
                             {
                                 taskResult.Success = false;
-                                taskResult.Message = "Email nie został zmieniony";
+                                taskResult.Message = "Nie można było wygenerować nowego tokena";
                             }
-                        }
-                    }
-                    else
-                    {
-                        taskResult.Success = false;
-                        taskResult.Message = "Użytkownik o takim adresie email już istnieje";
-                    }
-                }
-                else
-                {
-                    taskResult.Success = false;
-                    taskResult.Message = "Model was null";
-                }
-            }
-            catch (Exception ex)
-            {
-                taskResult.Success = false;
-                taskResult.Message = ex.Message;
-            }
-            return taskResult;
-        }
-
-
-        public async Task<TaskResult<ChangePasswordViewModel>> ChangePassword(ChangePasswordViewModel model)
-        {
-            var taskResult = new TaskResult<ChangePasswordViewModel>() { Success = true, Model = new ChangePasswordViewModel(), Message = "" };
-
-            try
-            {
-                if (model != null)
-                {
-                    ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
-                    if (user != null)
-                    {
-                        IdentityResult result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-                        if (result.Succeeded)
-                        {
-                            taskResult.Success = true;
-
-                            // wylogowanie
-                            //await _signInManager.SignOutAsync ();
                         }
                         else
                         {
                             taskResult.Success = false;
-                            taskResult.Message = "Błędne hasło";
+                            taskResult.Message = "Email or role was null";
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
                         taskResult.Success = false;
-                        taskResult.Message = "Wskazany użytkownik nie istnieje";
+                        taskResult.Message = ex.Message;
                     }
-                }
-                else
-                {
-                    taskResult.Success = false;
-                    taskResult.Message = "Model was null";
-                }
-            }
-            catch (Exception ex)
-            {
-                taskResult.Success = false;
-                taskResult.Message = ex.Message;
-            }
 
-            return taskResult;
+                    return Task.FromResult(taskResult);
+                }
+        */
+
+
+        /*
+                public Task<TaskResult<bool>> TokenTimeExpired ()
+                {
+                    var taskResult = new TaskResult<bool>() { Success = true, Model = true, Message = "" };
+
+                    try
+                    {
+                        if (DateTime.Now >= czasWylogowania)
+                        {
+                            taskResult.Success = true;
+                            taskResult.Model = true;
+                        }
+                        else
+                        {
+                            taskResult.Success = false;
+                            taskResult.Model = false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        taskResult.Success = false;
+                        taskResult.Message = ex.Message;
+                    }
+
+                    return Task.FromResult (taskResult);
+                }
+        */
+
+        public async Task Logout()
+        {
+
+            // mówi o tym, kiedyu żytkownik się zalogował i wylogował oraz oblicza czas zalogowania
+            rejestratorLogowaniaId = Guid.NewGuid().ToString();
+
+            var dataZalogowania = dataZalogowaniaExternal;
+            var dataWylogowania = DateTime.Now;
+            var czasZalogowaniaObliczenia = dataWylogowania - dataZalogowania;
+            //string czasZalogowania = RemoveMilisecondsFromData(czasZalogowaniaObliczenia.ToString ());
+
+
+            RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
+            {
+                RejestratorLogowaniaId = rejestratorLogowaniaId,
+                DataZalogowania = dataZalogowania.ToString(),
+                DataWylogowania = DateTime.Now.ToString(),
+                CzasZalogowania = czasZalogowaniaObliczenia.ToString(),
+                UserId = userId
+            };
+
+            /*RejestratorLogowania rejestratorLogowania = new RejestratorLogowania()
+            {
+                RejestratorLogowaniaId = Guid.NewGuid().ToString(),
+                DataZalogowania = "sdf",
+                DataWylogowania = "sdf",
+                CzasZalogowania = "SD",
+                UserId = "19f972cf-ff54-4152-a709-d9d2c9c51843"
+            };*/
+            _context.RejestratorLogowania.Add(rejestratorLogowania);
+            _context.SaveChanges();
+
+
+            await _signInManager.SignOutAsync();
         }
 
 
+        /*
+                // Usuwa milisekundy z daty, która wygląda np tak "12:12:12.52647568" lub tak "11.12:12:12.52647568"
+                private string RemoveMilisecondsFromData (string timeSpanString)
+                {
+                    string data = "";
+                    try
+                    {
+                        List<string> reverseList = new List<string>();
+                        string reverseString = "";
+
+                        // dzieli string na litery i dodaje je do listy
+                        for (var i = 0; i < timeSpanString.Length; i++)
+                        {
+                            reverseList.Add(timeSpanString[i].ToString());
+                        }
+                        reverseList.Reverse();
+                        reverseString = string.Concat(reverseList.ToList());
+
+                        int indexOf = reverseString.IndexOf('.');
+                        int index = indexOf + 1;
+
+                        reverseString = reverseString.Substring(index, reverseString.Length - index);
+                        reverseList.Clear();
+                        for (var i = 0; i < reverseString.Length; i++)
+                        {
+                            reverseList.Add(timeSpanString[i].ToString());
+                        }
+                        reverseString = string.Concat(reverseList.ToList());
+                        data = reverseString;
+                    }
+                    catch (Exception ex)
+                    {
+                        data = "";
+                    }
+                    return data;
+                }
+        */
 
 
         public async Task<TaskResult<ApplicationUser>> UpdateAccount(ApplicationUser model)
@@ -580,6 +573,108 @@ namespace Application.Services
         }
 
 
+
+
+        public async Task<TaskResult<ChangeEmailViewModel>> ChangeEmail(ChangeEmailViewModel model)
+        {
+            var taskResult = new TaskResult<ChangeEmailViewModel>() { Success = true, Model = new ChangeEmailViewModel(), Message = "" };
+
+            try
+            {
+                // Sprawdza czy pola nie są puste
+                if (model != null)
+                {
+                    // wyszukuja użytkownika na podstawie emaila
+                    if ((await _context.Users.FirstOrDefaultAsync(f => f.Email == model.NewEmail)) == null)
+                    {
+                        ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
+                        if (user != null)
+                        {
+                            string token = await _userManager.GenerateChangeEmailTokenAsync(user, model.NewEmail);
+                            var result = await _userManager.ChangeEmailAsync(user, model.NewEmail, token);
+                            if (result.Succeeded)
+                            {
+                                // zaktualizowanie nazwy użytkownika 
+                                user.Email = model.NewEmail;
+                                user.UserName = model.NewEmail;
+                                await _userManager.UpdateAsync(user);
+                                //await _signInManager.SignOutAsync ();
+                                taskResult.Success = true;
+                            }
+                            else
+                            {
+                                taskResult.Success = false;
+                                taskResult.Message = "Email nie został zmieniony";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        taskResult.Success = false;
+                        taskResult.Message = "Użytkownik o takim adresie email już istnieje";
+                    }
+                }
+                else
+                {
+                    taskResult.Success = false;
+                    taskResult.Message = "Model was null";
+                }
+            }
+            catch (Exception ex)
+            {
+                taskResult.Success = false;
+                taskResult.Message = ex.Message;
+            }
+            return taskResult;
+        }
+
+
+
+        public async Task<TaskResult<ChangePasswordViewModel>> ChangePassword(ChangePasswordViewModel model)
+        {
+            var taskResult = new TaskResult<ChangePasswordViewModel>() { Success = true, Model = new ChangePasswordViewModel(), Message = "" };
+
+            try
+            {
+                if (model != null)
+                {
+                    ApplicationUser user = await _userManager.FindByEmailAsync(model.Email);
+                    if (user != null)
+                    {
+                        IdentityResult result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                        if (result.Succeeded)
+                        {
+                            taskResult.Success = true;
+
+                            // wylogowanie
+                            //await _signInManager.SignOutAsync ();
+                        }
+                        else
+                        {
+                            taskResult.Success = false;
+                            taskResult.Message = "Błędne hasło";
+                        }
+                    }
+                    else
+                    {
+                        taskResult.Success = false;
+                        taskResult.Message = "Wskazany użytkownik nie istnieje";
+                    }
+                }
+                else
+                {
+                    taskResult.Success = false;
+                    taskResult.Message = "Model was null";
+                }
+            }
+            catch (Exception ex)
+            {
+                taskResult.Success = false;
+                taskResult.Message = ex.Message;
+            }
+
+            return taskResult;
+        }
 
 
 
@@ -824,6 +919,12 @@ namespace Application.Services
 
             return taskResult;
         }
+
+
+
+
+
+
 
 
 

@@ -109,6 +109,8 @@ namespace Data.Repos
 
 
 
+
+
         public async Task<TaskResult<RejestratorLogowania>> Update(RejestratorLogowania model)
         {
             var taskResult = new TaskResult<RejestratorLogowania>() { Success = true, Model = new RejestratorLogowania(), Message = "" };

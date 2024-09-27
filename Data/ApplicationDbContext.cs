@@ -117,6 +117,7 @@ namespace Data
 
             PasswordHasher<ApplicationUser> passwordHasher = new PasswordHasher<ApplicationUser>();
 
+
             ApplicationUser administratorUser = new ApplicationUser()
             {
                 Id = Guid.NewGuid().ToString(),
@@ -130,7 +131,7 @@ namespace Data
                 KodPocztowy = "12-222",
                 Kraj = "Polska",
                 Telefon = "235235235",
-                DataUrodzenia = DateTime.Now.AddYears(-_rand.Next(20, 50)).ToString(),
+                DataUrodzenia = "2024-09-18T22:00:00.000Z",
                 EmailConfirmed = true,
                 NormalizedUserName = "admin@admin.pl".ToUpper(),
                 NormalizedEmail = "admin@admin.pl".ToUpper(),
@@ -160,7 +161,7 @@ namespace Data
                 KodPocztowy = "12-222",
                 Kraj = "Polska",
                 Telefon = "235235235",
-                DataUrodzenia = DateTime.Now.AddYears(-_rand.Next(20, 50)).ToString(),
+                DataUrodzenia = "2024-09-18T22:00:00.000Z",
                 EmailConfirmed = true,
                 NormalizedUserName = "user@user.pl".ToUpper(),
                 NormalizedEmail = "user@user.pl".ToUpper(),
